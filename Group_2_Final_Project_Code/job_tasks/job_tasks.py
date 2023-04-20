@@ -6,12 +6,13 @@ import os
 from celery import Celery
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
+import logging
 
 
 broker_url = os.environ.get("CELERY_BROKER_URL"),
 res_backend = os.environ.get("CELERY_RESULT_BACKEND")
 
-celery_app = Celery(name='worker',
+celery_app = Celery(name='job_tasks',
                     broker=broker_url,
                     result_backend=res_backend)
 
@@ -182,6 +183,15 @@ def send_census_report(county, state, email):
         r_data = r.json()
         
         result = calc_index(county,state,r_data)
-        return result
+        message = Mail(
+                from_email="han_yang@berkeley.edu",
+                to_emails=email,
+                subject="Your SVI report",
+                html_content=result)
+        try:
+                sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+                sg.send(message)
+        except Exception as e:
+                logging.error(e)
     except:
         return "not right"

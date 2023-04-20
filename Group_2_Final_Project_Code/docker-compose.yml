@@ -1,18 +1,36 @@
 version: '3'
 
 services:
-  db_async:
-    image: postgres
+  job_broker:
+    image: redis:latest
+    container_name: job_broker
+  
+  job_db:
+    image: postgres:latest
+    container_name: job_db
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: async_task
-    ports:
-      - 5433:5433 
+      POSTGRES_USER: dbc
+      POSTGRES_PASSWORD: dbc
+      POSTGRES_DB: celery
+    volumes:
+      - postgres-volume:/var/lib/postgresql/data
+
+  job_worker:
+    build: ./job_worker/.
+    container_name: job_worker
+    volumes:
+      - ./job_tasks/job_tasks.py:/app/job_tasks.py
+    environment:
+      CELERY_BROKER_URL: redis://job_broker:6379
+      CELERY_RESULT_BACKEND: db+postgresql://dbc:dbc@job_db:5432/celery
+      SENDGRID_API_KEY: KEY
+    depends_on:
+      - job_broker
+      - job_db
 
   db:
-    image: postgres
-    container_name: postgres_server
+    image: postgres:latest
+    container_name: postgres_container
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -20,39 +38,33 @@ services:
     volumes:
       - ./init.db.sql:/docker-entrypoint-initdb.d/init.db.sql
     ports:
-      - 5432:5432 
+      - 5432:5432
 
-  worker:
-    build: ./worker
-    environment:
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - SENDGRID_API_KEY=******
-      - SENDGRID_SEND_FROM_EMAIL=******
-      - CELERY_RESULT_BACKEND=db+postgresql://postgres:postgres@db_async:5433/async_task
-    volumes:
-      - ./worker/worker.py:/app/worker.py
-
-  redis:
-    image: redis
-    ports:
-      - "6379:6379"
-      
   census_report:
-    build: ./census_report
-    container_name: "census_report"
+    build: ./census_report/
+    container_name: census_report
+    volumes:
+        - ./job_tasks/job_tasks.py:/app/job_tasks.py
+    image: census-report-image
     ports:
-      - "5050:5050"
+      - 5050:5050
+    environment:
+      CELERY_BROKER_URL: redis://job_broker:6379
+      CELERY_RESULT_BACKEND: db+postgresql://dbc:dbc@job_db:5432/celery
     depends_on:
-      - db
+        - job_broker
+        - job_db
+        - job_worker
 
-
-  job_viewer:
+  job_viewer:  
     image: mher/flower
     environment:
-      - CELERY_BROKER_URL=redis://redis:6379
+      - CELERY_BROKER_URL=redis://job_broker:6379
       - FLOWER_PORT=8888
-    ports:
+    ports:  
       - 8888:8888
     depends_on:
-      - redis
+        - job_broker
 
+volumes:
+  postgres-volume: {}

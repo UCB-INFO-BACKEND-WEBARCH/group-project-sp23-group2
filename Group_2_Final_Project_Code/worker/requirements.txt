@@ -1,7 +1,0 @@
-flask==2.2.3
-Flask-SQLAlchemy==3.0.3
-celery
-redis
-sendgrid
-postgres
-psycopg2-binary
