@@ -7,6 +7,7 @@ from celery import Celery
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 import logging
+import json
 
 
 broker_url = os.environ.get("CELERY_BROKER_URL"),
@@ -70,7 +71,7 @@ def calc_index(county,state,data):
                         #Format: {"county":"str","county_index":float,"state":"str","state_avg_index":float}
                         #Example: {"county":"Los Angeles County", "county_index":4.40, "state":"California", "state_avg_index": 4.05}
                         output = {'county':county,'county_index':county_ind,"state":state, 'state_avg_index':state_avg}
-                        return jsonify(output)
+                        return json.dumps(str(output))
                 else:
                         return "County not in State or this dataset", 403
         except:
