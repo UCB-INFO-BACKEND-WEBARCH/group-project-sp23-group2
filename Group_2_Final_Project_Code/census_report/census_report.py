@@ -64,20 +64,20 @@ def report():
     except:
         return "Invalid input", 400
     
-    # if validate_county_state_pair(state, county):
-    new_request_history = Census_request_history(county=county, state=state, email=email)
-    db.session.add(new_request_history)
-    db.session.commit()
-    print('Request history added successfully', flush=True)
+    if validate_county_state_pair(state, county):
+        new_request_history = Census_request_history(county=county, state=state, email=email)
+        db.session.add(new_request_history)
+        db.session.commit()
+        print('Request history added successfully', flush=True)
 
-    asyncTask = send_census_report.delay(county, state, email)
-    taskID = asyncTask.id
-    return json.dumps({
-        'message': 'We will process your request and email you the results when ready.',
-        'taskID': taskID
-    })
-    # else:
-    #     return "Invalid county or state, please verify your input", 400
+        asyncTask = send_census_report.delay(county, state, email)
+        taskID = asyncTask.id
+        return json.dumps({
+            'message': 'We will process your request and email you the results when ready.',
+            'taskID': taskID
+        })
+    else:
+        return "Invalid county or state, please verify your input", 400
 
 
 @app.route("/result/<id>", methods=['GET'])
