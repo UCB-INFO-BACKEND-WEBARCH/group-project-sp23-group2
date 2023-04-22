@@ -53,4 +53,6 @@ Our original goal for this project was to develop a county-level Social Vulnerab
 * If emails cannot be sent, users receive "Something is not right. Email not sent."
 
 ## What did you learn from the project? 
-* 
+* We learned how to construct a backend development pipeline while working with containers
+* We learned how to diagram the development work flow and divide up the work between multiple people and stages.
+* We learned how to work with external APIs, async task queues, inspect the 'job' with flower, and how to containerize apps and host a sql database with Docker container. 
