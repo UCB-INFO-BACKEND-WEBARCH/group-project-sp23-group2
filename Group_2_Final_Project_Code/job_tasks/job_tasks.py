@@ -195,4 +195,4 @@ def send_census_report(county, state, email):
         except Exception as e:
                 logging.error(e)
     except:
-        return "not right"
+        return "Something is not right. Email not sent."
