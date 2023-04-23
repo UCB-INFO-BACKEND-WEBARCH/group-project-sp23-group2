@@ -14,7 +14,7 @@ Our original goal for this project was to develop a county-level Social Vulnerab
 * Calculate a county-level SVI for the inquired county and a state average SVI for the state where the inquired county is located
 * Send both indices in a json format using SendGrid API to the email address users inputted
 ### What we achieved as extras
-* Validate the county and state names using OpenStreetMap API
+* Validate the county and state names using the Nominatim API provided by OpenStreetMap (OSM)
 ### Limitations / What we were unable to achieve
 * Generate a graph for the indices and send it via email
 * The Census API does not provide data for every county
