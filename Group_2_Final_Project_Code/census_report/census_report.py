@@ -81,13 +81,13 @@ def report():
 
 
 @app.route("/result/<id>", methods=['GET'])
-# return result and save SVI from worker db to history db
+# return result of the SVI request
 def result(id):
     res = AsyncResult(id, app=celery_app)
-    svi = -1
     if res.status == "SUCCESS":
-        svi = res.get()
-    return json.dumps({"SVI": svi})
+        return res.get()
+    else:
+        return "Unsuccessful"
 
 
 @app.route("/history", methods=['GET'])

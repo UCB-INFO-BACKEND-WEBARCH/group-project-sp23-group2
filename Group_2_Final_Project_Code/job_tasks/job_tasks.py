@@ -192,6 +192,7 @@ def send_census_report(county, state, email):
         try:
                 sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
                 sg.send(message)
+                return result
         except Exception as e:
                 logging.error(e)
     except:
